@@ -32,6 +32,9 @@ WA_URL = f"https://graph.facebook.com/{VERSION}/{PHONE_NUMBER_ID}/messages"
 EMAIL_SENDER = "siyas.care@gmail.com"
 OWNER_EMAIL = "siyas.care@gmail.com"
 
+# ===== REVIEW LINK =====
+REVIEW_LINK = "https://siyasinternational.com/"
+
 # ===== DATABASE =====
 client = pymongo.MongoClient("mongodb+srv://vidhi:Vidhi12@cluster0.lpjthfz.mongodb.net/?appName=Cluster0")
 db = client["siyas_database"]
@@ -71,7 +74,7 @@ def send_whatsapp(to_number, message_body):
     response = requests.post(WA_URL, headers=headers, json=payload)
     return response.json()
 
-# ===== NOTIFICATION =====
+# ===== NOTIFICATION (customer-facing only) =====
 def send_notification(contact, email, message, subject="Notification"):
     try:
         result = send_whatsapp(contact, message)
@@ -120,7 +123,7 @@ def chalan_page():
     serial_no = str(count).zfill(3)
     return render_template("chalan.html", serial_no=serial_no)
 
-# ===== BOOKING SUBMIT (1st form) =====
+# ===== BOOKING SUBMIT (1st form) — ONLY owner notified =====
 @app.route("/submit-booking", methods=["POST"])
 def submit_booking():
     data = {
@@ -140,7 +143,7 @@ def submit_booking():
     # ONLY owner gets this — with full form detail
     send_email(
         OWNER_EMAIL, "New Booking Received!",
-        f"New Booking!\n\n"
+        f"New Booking Received!\n\n"
         f"Name: {data['fullname']}\n"
         f"Contact: {data['contact']}\n"
         f"Email: {data['email']}\n"
@@ -149,11 +152,11 @@ def submit_booking():
         f"Description: {data['description']}"
     )
 
-    flash("Booking submitted successfully!")
+    flash("Booking submitted successfully! We'll contact you shortly.")
     return redirect(url_for("booking_page"))
 
 
-# ===== CHALAN SUBMIT (2nd form) =====
+# ===== CHALAN SUBMIT (2nd form) — ONLY customer notified =====
 @app.route("/submit-chalan", methods=["POST"])
 def submit_chalan():
     tracking_no = "TRK" + str(random.randint(10000, 99999))
@@ -195,7 +198,7 @@ def submit_chalan():
     }
     form2_collection.insert_one(data)
 
-    # ONLY customer gets this — professional thank you + tracking detail
+    # ONLY customer gets this
     send_notification(
         data["contact"], data["email"],
         f"Dear {data['name']},\n\n"
@@ -220,8 +223,6 @@ def tracking_result_page():
     })
     found = bool(record)
 
-    # If a bill has already been generated for this record, send the
-    # customer straight to the bill page instead of the plain tracking page.
     if found and record.get("bill_generated"):
         return redirect(url_for("bill_page", search_term=search))
 
@@ -349,7 +350,7 @@ def clear_chalans():
     flash("All records cleared")
     return redirect(url_for("admin_dashboard"))
 
-# ===== GENERATE BILL =====
+# ===== GENERATE BILL — ONLY customer notified, with thank you + review link =====
 @app.route("/generate-bill/<id>", methods=["POST"])
 @admin_required
 def generate_bill(id):
@@ -382,13 +383,15 @@ def generate_bill(id):
             f"Tracking Number: {record['tracking_no']}\n"
             f"Total Amount (incl. GST): Rs.{total}\n\n"
             f"You can view and download your bill from our website using your tracking number.\n\n"
+            f"Thank you for trusting us with your repair. We'd love to hear about your experience — "
+            f"please take a moment to share a review here: {REVIEW_LINK}\n\n"
             f"Regards,\nSiya's International",
             "Your Bill is Ready - Siya's International"
         )
     flash(f"Bill generated! Total: Rs.{total} (incl. GST)")
     return redirect(url_for("admin_dashboard"))
 
-# ===== ENGINEER UPDATE =====
+# ===== ENGINEER UPDATE — ONLY customer notified =====
 @app.route("/engineer-update/<id>", methods=["POST"])
 @engineer_required
 def engineer_update(id):
