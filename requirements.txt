@@ -1,0 +1,7 @@
+flask
+pymongo
+requests
+werkzeug
+gunicorn
+dnspython
+resend

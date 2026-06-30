@@ -1,0 +1,129 @@
+{% extends 'base.html' %}
+
+{% block title %}Book Service - Siya's International{% endblock %}
+
+{% block content %}
+<div class="booking-container">
+    <!-- Left Side - Company Info -->
+    <div class="booking-left">
+        <img src="{{ url_for('static', filename='image/logo.png') }}" alt="Logo" class="logo">
+        <h1>SIYA'S INTERNATIONAL</h1>
+        
+        <img src="{{ url_for('static', filename='image/our address(1).png') }}" alt="Address QR" class="qr-code">
+        <p class="qr-label">Scan for our address</p>
+        
+        <div class="features">
+            <div class="feature-item">
+                <img src="{{ url_for('static', filename='image/trusted.png') }}" alt="Trusted">
+                <p>Trusted</p>
+            </div>
+            <div class="feature-item">
+                <img src="{{ url_for('static', filename='image/quick.png') }}" alt="Quick">
+                <p>Quick</p>
+            </div>
+            <div class="feature-item">
+                <img src="{{ url_for('static', filename='image/quality.png') }}" alt="Quality">
+                <p>Quality</p>
+            </div>
+        </div>
+        
+        <div class="company-info">
+    <p><strong>Open Hours:</strong></p>
+    <p>Monday - Saturday</p>
+    <p>10:00 AM to 7:30 PM</p>
+
+    <p style="margin-top: 15px;">
+        5/262, Sector 5, Malviya Nagar<br>
+        Jaipur, Rajasthan 302017
+    </p>
+</div>
+<div class="social-icons">
+   <div class="social-item">
+    <a href="https://www.instagram.com/siyas_international/" target="_blank">
+        <img src="{{ url_for('static', filename='image/instagram.png') }}" alt="Instagram">
+        <p>Instagram</p>
+    </a>
+</div>
+
+    <div class="social-item">
+    <a href="https://www.youtube.com/@siyasinternationaljaipur" target="_blank">
+        <img src="{{ url_for('static', filename='image/youtube.png') }}" alt="YouTube">
+        <p>YouTube</p>
+    </a>
+</div>
+
+    <div class="social-item">
+    <a href="https://www.facebook.com/p/Siyas-international-100063536035626/" target="_blank">
+        <img src="{{ url_for('static', filename='image/facebook.png') }}" alt="Facebook">
+        <p>Facebook</p>
+    </a>
+</div>
+    <div class="social-item">
+    <a href="https://api.whatsapp.com/send/?phone=9509526358" target="_blank">
+        <img src="{{ url_for('static', filename='image/whatsapp.png') }}" alt="WhatsApp">
+        <p>WhatsApp</p>
+    </a>
+</div>
+</div>
+    </div>
+    <!-- Right Side - Form -->
+    <div class="booking-right">
+        <div class="form-card">
+            <h2>Book your Service</h2>
+            <form id="bookingForm" action="/submit-booking" method="POST">
+                <div class="form-group">
+                    <label for="fullname">Full Name</label>
+                    <input type="text" id="fullname" name="fullname" placeholder="Enter your full name" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="contact">Contact Number</label>
+                    <input type="tel" id="contact" name="contact" placeholder="Enter your 10-digit number" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" name="email" placeholder="Enter your email">
+                </div>
+                
+                <div class="form-group">
+                    <label for="brand">Device Brand</label>
+                    <select id="brand" name="brand" required>
+                        <option value="" disabled selected>Choose Brand</option>
+                        <option>Apple</option>
+                        <option>Dell</option>
+                        <option>HP</option>
+                        <option>Sony Vaio</option>
+                        <option>Lenovo</option>
+                        <option>Acer</option>
+                        <option>Samsung</option>
+                        <option>Asus</option>
+                        <option>MSI</option>
+                        <option>Other</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="issue">Issue Title</label>
+                    <input type="text" id="issue" name="issue" placeholder="e.g., Screen not working" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="description">Description</label>
+                    <textarea id="description" name="description" rows="4" placeholder="Describe your issue in detail..."></textarea>
+                </div>
+                
+                <button type="submit" class="btn btn-primary">Submit Request</button>
+            </form>
+            
+            <div class="nav-links">
+                <a href="/tracking">Track Your Device</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/main.js') }}"></script>
+{% endblock %}

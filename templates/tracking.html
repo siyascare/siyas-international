@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+
+{% block title %}Track Your Device - Siya's International{% endblock %}
+
+{% block content %}
+<div class="tracking-container">
+    <div class="tracking-card">
+        <h1>Track Your Service</h1>
+        <p class="subtitle">Enter your tracking number or phone number</p>
+        
+        <form action="/tracking-result" method="GET">
+            <div class="form-group">
+                <input type="text" name="search_term" placeholder="Tracking Number or Phone Number" required>
+            </div>
+            <button type="submit" class="btn btn-primary">Track Status</button>
+        </form>
+        
+        <div class="nav-links">
+            <a href="/">Book New Service</a>
+            <a href="/chalan">Service Drop-off</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

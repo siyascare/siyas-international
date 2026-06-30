@@ -1,0 +1,200 @@
+{% extends 'base.html' %}
+{% block title %}Admin Dashboard - Siya's International{% endblock %}
+{% block content %}
+<div class="dashboard-container">
+    <div class="dashboard-header">
+        <div>
+            <h1>Admin Dashboard</h1>
+            <p class="company-name">Siya's International</p>
+        </div>
+        <div class="dashboard-nav">
+            <a href="/engineer-login" class="btn btn-secondary btn-sm">Engineer Portal</a>
+            <a href="/admin-logout" class="btn btn-danger btn-sm">Logout</a>
+        </div>
+    </div>
+
+    <div class="tab-container">
+        <button class="tab-btn active" onclick="showTab('bookings')">Online Bookings ({{ bookings|length }})</button>
+        <button class="tab-btn" onclick="showTab('chalans')">Service Forms ({{ chalans|length }})</button>
+    </div>
+
+    <!-- BOOKINGS TAB -->
+    <div id="bookings-tab" class="tab-content active">
+        <div class="dashboard-card">
+            <div class="dashboard-card-header">
+                <h2>Online Booking Requests</h2>
+                <input type="text" class="search-box" placeholder="Search..." onkeyup="filterTable('bookings-table', this.value)">
+            </div>
+            <table class="data-table" id="bookings-table">
+                <thead>
+                    <tr><th>#</th><th>Date</th><th>Name</th><th>Contact</th><th>Email</th><th>Brand</th><th>Issue</th><th>Status</th><th>Note/Update</th><th>Delete</th></tr>
+                </thead>
+                <tbody>
+                    {% for record in bookings %}
+                    <tr>
+                        <td>{{ loop.index }}</td>
+                        <td>{% if record.created_at %}{{ record.created_at.strftime('%d-%m-%Y') }}{% else %}N/A{% endif %}</td>
+                        <td>{{ record.fullname }}</td>
+                        <td>{{ record.contact }}</td>
+                        <td>{{ record.email }}</td>
+                        <td>{{ record.brand }}</td>
+                        <td>{{ record.issue }}</td>
+                        <td><span class="status-badge {% if record.status == 'Seen' %}status-delivered{% else %}status-received{% endif %}">{{ record.status }}</span></td>
+                        <td>
+                            <form action="/update-booking-status" method="POST" class="inline-form">
+                                <input type="hidden" name="booking_id" value="{{ record._id }}">
+                                <input type="text" name="admin_note" class="inline-input" placeholder="Note..." value="{{ record.admin_note or '' }}">
+                                <select name="status" class="inline-select">
+                                    <option value="Unseen" {% if record.status=='Unseen' %}selected{% endif %}>Unseen</option>
+                                    <option value="Seen" {% if record.status=='Seen' %}selected{% endif %}>Seen</option>
+                                </select>
+                                <button type="submit" class="btn btn-success btn-sm">Save</button>
+                            </form>
+                        </td>
+                        <td>
+                            <form action="/delete-booking" method="POST" style="display:inline;">
+                                <input type="hidden" name="booking_id" value="{{ record._id }}">
+                                <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Delete?')">Del</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr><td colspan="10" style="text-align:center;">No bookings</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <div style="text-align:right; margin-top:10px;">
+            <a href="/clear-bookings" class="btn btn-danger btn-sm" onclick="return confirm('Delete ALL?')">Clear All</a>
+        </div>
+    </div>
+
+    <!-- CHALANS TAB -->
+    <div id="chalans-tab" class="tab-content">
+        <div class="dashboard-card">
+            <div class="dashboard-card-header">
+                <h2>Service Forms</h2>
+                <input type="text" class="search-box" placeholder="Search..." onkeyup="filterTable('chalans-table', this.value)">
+            </div>
+            <table class="data-table" id="chalans-table">
+                <thead>
+                    <tr><th>#</th><th>Tracking</th><th>Name</th><th>Contact</th><th>Device</th><th>Problem</th><th>Status</th><th>Engineer</th><th>Photo</th><th>Bill</th><th>Actions</th></tr>
+                </thead>
+                <tbody>
+                    {% for record in chalans %}
+                    <tr>
+                        <td>{{ loop.index }}</td>
+                        <td><strong>{{ record.tracking_no }}</strong></td>
+                        <td>{{ record.name }}</td>
+                        <td>{{ record.contact }}</td>
+                        <td>{{ record.brand }} {{ record.product_type }}</td>
+                        <td>{{ (record.problem or '')[:30] }}{% if record.problem and record.problem|length > 30 %}...{% endif %}</td>
+                        <td>
+                            <span class="status-badge {% if record.status=='Received' %}status-received{% elif record.status=='In Progress' %}status-in-progress{% elif record.status=='Ready to Pay' %}status-ready{% else %}status-delivered{% endif %}">
+                                {{ record.status }}
+                            </span>
+                        </td>
+                        <td>{{ record.assigned_engineer or '-' }}</td>
+                        <td>
+                            {% if record.device_photo %}
+                            <a href="{{ url_for('static', filename='uploads/' + record.device_photo) }}" target="_blank">
+                                <img src="{{ url_for('static', filename='uploads/' + record.device_photo) }}" style="width:45px;height:45px;object-fit:cover;border-radius:4px;">
+                            </a>
+                            {% else %}-{% endif %}
+                        </td>
+                        <td>
+                            <button class="btn btn-secondary btn-sm" onclick="toggleBillForm('{{ record._id }}')">
+                                {% if record.bill_generated %}Edit{% else %}Generate{% endif %}
+                            </button>
+                            {% if record.bill_generated %}
+                            <a href="/bill?search_term={{ record.tracking_no }}" class="btn btn-success btn-sm">View</a>
+                            {% endif %}
+                        </td>
+                        <td class="actions">
+                            <button class="expand-btn" onclick="toggleRow('details-{{ record._id }}')">▼</button>
+                            <form action="/delete-chalan" method="POST" style="display:inline;">
+                                <input type="hidden" name="chalan_id" value="{{ record._id }}">
+                                <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Delete?')">Del</button>
+                            </form>
+                        </td>
+                    </tr>
+                    <tr class="expandable-row" id="details-{{ record._id }}">
+                        <td colspan="11">
+                            <div class="expandable-content">
+                                <div style="display:grid; grid-template-columns:1fr 1fr; gap:20px;">
+                                    <!-- Update Form -->
+                                    <div>
+                                        <h4 style="color:var(--primary-blue); margin-bottom:15px;">Update Status</h4>
+                                        <form action="/update-chalan-status" method="POST">
+                                            <input type="hidden" name="chalan_id" value="{{ record._id }}">
+                                            <div class="form-group">
+                                                <label>Status</label>
+                                                <select name="status" class="inline-select" style="width:100%;">
+                                                    <option value="Received" {% if record.status=='Received' %}selected{% endif %}>Received</option>
+                                                    <option value="In Progress" {% if record.status=='In Progress' %}selected{% endif %}>In Progress</option>
+                                                    <option value="Ready to Pay" {% if record.status=='Ready to Pay' %}selected{% endif %}>Ready to Pay</option>
+                                                    <option value="Delivered" {% if record.status=='Delivered' %}selected{% endif %}>Delivered</option>
+                                                </select>
+                                            </div>
+                                            <div class="form-group">
+                                                <label>Assign Engineer</label>
+                                                <input type="text" name="assigned_engineer" class="inline-input" style="width:100%;" value="{{ record.assigned_engineer or '' }}">
+                                            </div>
+                                            <div class="form-group">
+                                                <label>Admin Note</label>
+                                                <input type="text" name="admin_note" class="inline-input" style="width:100%;" value="{{ record.admin_note or '' }}">
+                                            </div>
+                                            <button type="submit" class="btn btn-primary btn-sm">Update</button>
+                                        </form>
+                                    </div>
+                                    <!-- Bill Form -->
+                                    <div id="bill-form-{{ record._id }}" style="display:none;">
+                                        <h4 style="color:var(--primary-blue); margin-bottom:15px;">Generate Bill</h4>
+                                        <form action="/generate-bill/{{ record._id }}" method="POST" class="bill-form" onsubmit="return confirm('Generate Bill?')">
+                                            {% for i in range(1, 5) %}
+                                            <div class="form-group">
+                                                <label>Item {{ i }}</label>
+                                                <input type="text" name="item{{ i }}" placeholder="Description" value="{{ record.bill_items[i-1].item if record.bill_items and record.bill_items|length >= i else '' }}">
+                                            </div>
+                                            <div class="form-group">
+                                                <label>Amount Rs.</label>
+                                                <input type="number" name="item{{ i }}_amount" placeholder="0" value="{{ record.bill_items[i-1].amount if record.bill_items and record.bill_items|length >= i else '' }}">
+                                            </div>
+                                            {% endfor %}
+                                            <div id="extra-items-{{ record._id }}"></div>
+                                            <div class="form-group full-width">
+                                                <button type="button" onclick="addBillItem('{{ record._id }}')" style="font-size:20px;font-weight:bold;padding:6px 14px;background:#000;color:#fff;border:none;border-radius:5px;cursor:pointer;">+</button>
+                                            </div>
+                                            <div class="form-group full-width">
+                                                <button type="submit" class="btn {% if record.bill_generated %}btn-warning{% else %}btn-success{% endif %}">
+                                                    {% if record.bill_generated %}Update Bill{% else %}Generate Bill{% endif %}
+                                                </button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                                <div style="margin-top:15px; padding-top:15px; border-top:1px solid var(--border-color);">
+                                    <p><strong>Email:</strong> {{ record.email }}</p>
+                                    <p><strong>Model:</strong> {{ record.model_no }}</p>
+                                    <p><strong>Parts:</strong> {{ record.parts }}</p>
+                                    <p><strong>Body:</strong> {{ record.body_damaged }}</p>
+                                    <p><strong>Tray:</strong> {{ record.tray_no or 'N/A' }}</p>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr><td colspan="11" style="text-align:center;">No records</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <div style="text-align:right; margin-top:10px;">
+            <a href="/clear-chalans" class="btn btn-danger btn-sm" onclick="return confirm('Delete ALL?')">Clear All</a>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/main.js') }}"></script>
+{% endblock %}

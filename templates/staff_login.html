@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+
+{% block title %}{% if login_type == 'engineer' %}Engineer{% else %}Admin{% endif %} Login - Siya's International{% endblock %}
+
+{% block content %}
+<div class="login-container">
+    <div class="login-card">
+        <img src="{{ url_for('static', filename='image/logo.png') }}" alt="Logo" class="logo">
+        <h1>SIYA'S INTERNATIONAL</h1>
+        <p class="subtitle">{% if login_type == 'engineer' %}Engineer{% else %}Admin{% endif %} Portal</p>
+        
+        <form action="" method="POST">
+            {% if login_type != 'engineer' %}
+            <div class="form-group">
+                <label for="username">Username</label>
+                <input type="text" id="username" name="username" placeholder="Enter username" required>
+            </div>
+            {% endif %}
+            
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" placeholder="Enter password" required>
+            </div>
+            
+            <button type="submit" class="btn btn-primary">Login</button>
+        </form>
+        
+        <div class="nav-links">
+            <a href="/">Back to Home</a>
+            {% if login_type == 'engineer' %}
+            <a href="/admin-login">Admin Login</a>
+            {% else %}
+            <a href="/engineer-login">Engineer Login</a>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

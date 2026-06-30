@@ -1,0 +1,68 @@
+{% extends 'base.html' %}
+
+{% block title %}Tracking Result - Siya's International{% endblock %}
+
+{% block content %}
+<div class="tracking-container" style="max-width: 600px;">
+    {% if found %}
+    <div class="tracking-result">
+        <h2>Device Status</h2>
+        
+        <div class="tracking-info">
+            <div class="tracking-info-row">
+                <span class="tracking-info-label">Tracking Number</span>
+                <span class="tracking-info-value"><strong>{{ record.tracking_no }}</strong></span>
+            </div>
+            <div class="tracking-info-row">
+                <span class="tracking-info-label">Status</span>
+                <span class="tracking-info-value">
+                    <span class="status-badge 
+                        {% if record.status == 'Received' %}status-received
+                        {% elif record.status == 'In Progress' %}status-in-progress
+                        {% elif record.status == 'Ready to Pay' %}status-ready
+                        {% else %}status-delivered{% endif %}">
+                        {{ record.status }}
+                    </span>
+                </span>
+            </div>
+            <div class="tracking-info-row">
+                <span class="tracking-info-label">Device</span>
+                <span class="tracking-info-value">{{ record.brand }} {{ record.product_type }}</span>
+            </div>
+            <div class="tracking-info-row">
+                <span class="tracking-info-label">Problem</span>
+                <span class="tracking-info-value">{{ record.problem }}</span>
+            </div>
+            {% if record.estimate_charge %}
+            <div class="tracking-info-row">
+                <span class="tracking-info-label">Estimated Cost</span>
+                <span class="tracking-info-value">₹{{ record.estimate_charge }}</span>
+            </div>
+            {% endif %}
+            {% if record.admin_note %}
+            <div class="tracking-info-row">
+                <span class="tracking-info-label">Notes</span>
+                <span class="tracking-info-value">{{ record.admin_note }}</span>
+            </div>
+            {% endif %}
+        </div>
+        
+        {% if record.bill_generated %}
+        <div style="text-align: center; margin-top: 20px;">
+            <a href="/bill?search_term={{ record.tracking_no }}" class="btn btn-success">View Bill</a>
+        </div>
+        {% endif %}
+    </div>
+    {% else %}
+    <div class="tracking-card">
+        <h2 style="color: #ef4444;">Device Not Found</h2>
+        <p>Please check your tracking number or phone number and try again.</p>
+    </div>
+    {% endif %}
+    
+    <div class="nav-links" style="margin-top: 20px;">
+        <a href="/tracking">Search Again</a>
+        <a href="/">Book New Service</a>
+    </div>
+</div>
+{% endblock %}
