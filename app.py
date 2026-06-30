@@ -219,6 +219,12 @@ def tracking_result_page():
         "$or": [{"tracking_no": search}, {"contact": search}]
     })
     found = bool(record)
+
+    # If a bill has already been generated for this record, send the
+    # customer straight to the bill page instead of the plain tracking page.
+    if found and record.get("bill_generated"):
+        return redirect(url_for("bill_page", search_term=search))
+
     if record:
         record["_id"] = str(record["_id"])
     return render_template("tracking_result.html", found=found, record=record)
