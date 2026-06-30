@@ -51,7 +51,7 @@ def send_email(to_email, subject, body):
         resend.api_key = os.environ.get("RESEND_API_KEY")
         resend.Emails.send({
             "from": "Siya's International <onboarding@resend.dev>",
-            "to": ["siyas.care@gmail.com"],
+            "to": ["to_email"],
             "subject": subject,
             "text": body,
         })
