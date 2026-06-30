@@ -144,7 +144,7 @@ def submit_booking():
         "Booking Confirmation - Siya's International"
     )
 
-    # Message to owner
+    # Message to owner (ONLY booking form sends to owner)
     send_email(
         OWNER_EMAIL, "New Booking Received!",
         f"New Booking!\n\nName: {data['fullname']}\nContact: {data['contact']}\nBrand: {data['brand']}\nIssue: {data['issue']}\nDescription: {data['description']}"
@@ -196,7 +196,7 @@ def submit_chalan():
     }
     form2_collection.insert_one(data)
 
-    # Message to customer
+    # Message to customer ONLY (no owner email here)
     send_notification(
         data["contact"], data["email"],
         f"Dear {data['name']},\n\n"
@@ -206,12 +206,6 @@ def submit_chalan():
         f"registered phone number on our website.\n\n"
         f"Regards,\nSiya's International",
         "Device Received - Siya's International"
-    )
-
-    # Message to owner
-    send_email(
-        OWNER_EMAIL, "New Device Received!",
-        f"Name: {data['name']}\nContact: {data['contact']}\nTracking: {tracking_no}\nBrand: {data['brand']}\nProblem: {data['problem']}"
     )
 
     flash(f"Device received! Tracking No: {tracking_no}")
